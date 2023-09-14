@@ -1,0 +1,444 @@
+package com.kie_pract.incentivetest;
+
+import java.lang.Math.*;
+
+////////////////////////////////// new enhancement 13-09-2023  /////////////////////////////////////
+
+
+////////////////// calculate incentive for primary( 2% ) and secondary( 1% )  ps= false //////////////////////////////////////
+rule "CalculateincentiveForPrimary"
+//ruleflow-group "Test"
+salience 3
+when
+$R:IncentiveTest(eligibility_to_2== null,ps=="false" ,$A:scheme_id ,$B:based_on , $B.equals("% Of CTC") || $B.equals("% Of Revenue") || $B.equals("% Of Accounts") ,$C:type_of, $C.equals("CTC") || $C.equals("Revenue") || $C.equals("No. Of Accounts") ,$D:eligibility_to, $D.equals("Primary Sales"),$M:sales_type,$M.equals("Primary") || $M.equals("Secondary") , payment:payment!=null ,$E:((0.02)*payment) )
+then
+$R.setResults(""+$E);
+System.out.println("Lead Owner Incentive: "+$E);
+end
+
+
+rule "CalculateincentiveforSecondary"
+//ruleflow-group "Test"
+salience 3
+when
+$Y:IncentiveTest(eligibility_to_2== null,ps=="false" ,$A:scheme_id ,$B:based_on , $B.equals("% Of CTC") || $B.equals("% Of Revenue") || $B.equals("% Of Accounts") ,$C:type_of, $C.equals("CTC") || $C.equals("Revenue") || $C.equals("No. Of Accounts") ,$D:eligibility_to, $D.equals("Secondary Sales"),$M:sales_type,$M.equals("Primary") || $M.equals("Secondary") , payment:payment!=null  ,$E:((0.01)*payment) )
+then
+$Y.setResults(""+$E);
+System.out.println("Lead Owner Incentive: "+$E);
+end
+
+////////////////////////// calculate incentive for primary and  secondary  ////////////////////////
+
+
+
+
+rule "CalculateIncentiveforBoth1"
+//ruleflow-group "Test"
+salience 3
+when
+$O:IncentiveTest(payment:payment!=null ,ps=="true" ,$A:scheme_id, $B:based_on ,
+                 $B.equals("% Of CTC") || $B.equals("% Of Revenue") || $B.equals("% Of Accounts"),
+                  $C:type_of, $C.equals("CTC") || $C.equals("Revenue") || $C.equals("No. Of Accounts"),
+                  $D:eligibility_to, $D.equals("Secondary Sales"),
+                  $E:((0.01)*payment), $F:eligibility_to_2 ,$F.equals("Primary Sales") ,$G:based_on_2 ,  
+                  $G.equals("% Of CTC") || $G.equals("% Of Revenue") || $G.equals("% Of Accounts"),
+                   $I:type_of_2,$I.equals("CTC") || $I.equals("Revenue") || $I.equals("No. Of Accounts"),
+                    $M:sales_type, $M.equals("Primary") || $M.equals("Secondary") ,   $K:((0.02)*payment)
+                  ) 
+                  
+then
+$O.setIncentiveforPrimaryP($K);
+$O.setIncentiveforSecondaryP($E);
+$O.setResults("NA");
+System.out.println("Lead Owner Incentive: "+$E);
+System.out.println("Secondary Incentive: "+(payment*0.02) );
+end
+
+
+rule "CalculateIncentiveforBoth2"
+//ruleflow-group "Test"
+salience 3
+when
+$O:IncentiveTest(payment:payment!=null ,ps=="true" ,$A:scheme_id, $B:based_on ,
+                 $B.equals("% Of CTC") || $B.equals("% Of Revenue") || $B.equals("% Of Accounts"),
+                  $C:type_of, $C.equals("CTC") || $C.equals("Revenue") || $C.equals("No. Of Accounts"),
+                  $D:eligibility_to, $D.equals("Primary Sales"),
+                  $E:((0.02)*payment), $F:eligibility_to_2 ,$F.equals("Secondary Sales") ,$G:based_on_2 ,  
+                  $G.equals("% Of CTC") || $G.equals("% Of Revenue") || $G.equals("% Of Accounts"),
+                   $I:type_of_2,$I.equals("CTC") || $I.equals("Revenue") || $I.equals("No. Of Accounts"),
+                    $M:sales_type, $M.equals("Primary") || $M.equals("Secondary") ,   $K:((0.01)*payment)
+                  ) 
+                  
+then
+$O.setIncentiveforPrimaryP($E);
+$O.setIncentiveforSecondaryP($K);
+$O.setResults("NA");
+System.out.println("Lead Owner Incentive: "+$E);
+System.out.println("Secondary Incentive: "+(payment*0.02) );
+end
+
+
+
+/*
+
+///////////////////////////////////////////
+
+rule "CalculateIncentiveforBoth2"
+//ruleflow-group "Test"
+salience 3
+when
+$O:IncentiveTest(payment:payment!=null ,ps=="true" ,$A:scheme_id, $B:based_on ,
+                 $B.equals("% Of CTC") || $B.equals("% Of Revenue") || $B.equals("% Of Accounts"),
+                  $C:type_of, $C.equals("CTC") || $C.equals("Revenue") || $C.equals("No. Of Accounts"),
+                  $D:eligibility_to, $D.equals("Primary Sales"),
+                  $E:((0.02)*payment), $F:eligibility_to_2 ,$F.equals("Secondary Sales") ,$G:based_on_2 ,  
+                  $G.equals("% Of CTC") || $G.equals("% Of Revenue") || $G.equals("% Of Accounts"),
+                   $I:type_of_2,$I.equals("CTC") || $I.equals("Revenue") || $I.equals("No. Of Accounts"),
+                    $M:sales_type, $M.equals("Primary") || $M.equals("Secondary") ,   $K:((0.01)*payment)
+                  ) 
+                  
+then
+$O.setIncentiveforPrimaryP($E);
+$O.setIncentiveforSecondaryP($K);
+$O.setResults("NA");
+System.out.println("Lead Owner Incentive: "+$E);
+System.out.println("Secondary Incentive: "+(payment*0.02) );
+end
+
+
+
+/*
+ ( ,
+       )
+      && (
+      $I:type_of_2  , 
+       )
+
+*/
+
+
+
+
+/*
+
+
+//////////////// Lead Owner /////////////////
+rule "CalculateIncentiveLeadOwner1"
+//ruleflow-group "Test"
+salience 3
+when
+$R:IncentiveTest( $A:scheme_id ,$B:based_on , $B.equals("CTC") ,$C:type_of, $C.equals("Multiple of CTC")  ,$D:sales_type, $D.equals("Primary")|| $D.equals("Secondary")   ,$E:(ctc*value)  )
+//$R:IncentiveTest( payment>trgt_rev==true  ,$A:scheme_id ,based_on.equals("CTC") ,type_of.equals("Multiple of CTC")  ,sales_type.equals("Primary")|| sales_type.equals("Secondary")   ,$D:(ctc*value)  )
+//$R:IncentiveTest( payment>trgt_rev==true  ,$A:scheme_id ,based_on.equals("Multiple of CTC") ,type_of.equals("CTC")  ,sales_type.equals("Primary")|| sales_type.equals("Secondary")   ,$D:(ctc*value)  )
+then
+$R.setResults(""+$E);
+System.out.println("Lead Owner Incentive: "+$E);
+end
+
+
+/*
+
+rule "CalculateIncentiveLeadOwner2"
+ruleflow-group "Test"
+salience 3
+when
+//$R:IncentiveTest( payment>trgt_rev==false  ,$A:scheme_id ,based_on.equals("Multiple of CTC") ,type_of.equals("CTC")  ,sales_type.equals("Primary")|| sales_type.equals("Secondary")   ,$D:(ctc*value)  )
+$R:IncentiveTest( payment>trgt_rev==false  ,$A:scheme_id ,based_on.equals("CTC") ,type_of.equals("Multiple of CTC")  ,sales_type.equals("Primary")|| sales_type.equals("Secondary")   ,$D:(ctc*value)  )
+
+then
+$R.setResults("Payment Failed");
+System.out.println("Lead Owner Incentive: "+$D);
+end
+
+
+
+rule "CalculateIncentiveLeadOwner3"
+ruleflow-group "Test"
+salience 3
+when
+//$R:IncentiveTest( payment>trgt_rev==true  ,$A:scheme_id ,based_on.equals("% of CTC") ,type_of.equals("CTC")  ,sales_type.equals("Primary")|| sales_type.equals("Secondary")   ,$D:(value*(ctc/100))  )
+$R:IncentiveTest( payment>trgt_rev==true  ,$A:scheme_id ,based_on.equals("CTC") ,type_of.equals("% of CTC")  ,sales_type.equals("Primary")|| sales_type.equals("Secondary")   ,$D:(value*(ctc/100))  )
+then
+$R.setResults(""+$D);
+System.out.println("Lead Owner Incentive: "+$D);
+end
+
+rule "CalculateIncentiveLeadOwner4"
+ruleflow-group "Test"
+salience 3
+when
+//$R:IncentiveTest( payment>trgt_rev==false  ,$A:scheme_id ,based_on.equals("% of CTC") ,type_of.equals("CTC")  ,sales_type.equals("Primary")|| sales_type.equals("Secondary")   ,$D:(value*(ctc/100))  )
+$R:IncentiveTest( payment>trgt_rev==false  ,$A:scheme_id ,based_on.equals("CTC") ,type_of.equals("% of CTC")  ,sales_type.equals("Primary")|| sales_type.equals("Secondary")   ,$D:(value*(ctc/100))  )
+then
+$R.setResults("Payment Failed");
+System.out.println("Lead Owner Incentive: "+$D);
+end
+
+
+
+
+
+
+
+///// new Rule///
+rule "CalculateIncentiveLeadOwner5"
+ruleflow-group "Test"
+salience 3
+when
+//$R:IncentiveTest( payment>trgt_rev==true  ,$A:scheme_id ,based_on.equals("% of CTC") ,type_of.equals("CTC")  ,sales_type.equals("Primary")|| sales_type.equals("Secondary")   ,$D:(value*(ctc/100))  )
+$R:IncentiveTest( payment>trgt_rev==true  ,$A:scheme_id ,based_on.equals("No. of Accounts") ,type_of.equals("Multiple of Accounts")  ,sales_type.equals("Primary")|| sales_type.equals("Secondary")   ,$D:(value*(ctc/100))  )
+then
+$R.setResults("NA");
+System.out.println("Lead Owner Incentive: "+$D);
+end
+
+
+rule "CalculateIncentiveLeadOwner6"
+ruleflow-group "Test"
+salience 3
+when
+//$R:IncentiveTest( payment>trgt_rev==true  ,$A:scheme_id ,based_on.equals("% of CTC") ,type_of.equals("CTC")  ,sales_type.equals("Primary")|| sales_type.equals("Secondary")   ,$D:(value*(ctc/100))  )
+$R:IncentiveTest( payment>trgt_rev==false  ,$A:scheme_id ,based_on.equals("No. of Accounts") ,type_of.equals("Multiple of Accounts")  ,sales_type.equals("Primary")|| sales_type.equals("Secondary")   ,$D:(value*(ctc/100))  )
+then
+$R.setResults("NA");
+System.out.println("Lead Owner Incentive: "+$D);
+end
+
+rule "CalculateIncentiveLeadOwner7"
+ruleflow-group "Test"
+salience 3
+when
+//$R:IncentiveTest( payment>trgt_rev==true  ,$A:scheme_id ,based_on.equals("% of CTC") ,type_of.equals("CTC")  ,sales_type.equals("Primary")|| sales_type.equals("Secondary")   ,$D:(value*(ctc/100))  )
+$R:IncentiveTest( payment>trgt_rev==true  ,$A:scheme_id ,based_on.equals("No. of Accounts") ,type_of.equals("% of Accounts")  ,sales_type.equals("Primary")|| sales_type.equals("Secondary")   ,$D:(value*(ctc/100))  )
+then
+$R.setResults("NA");
+System.out.println("Lead Owner Incentive: "+$D);
+end
+
+rule "CalculateIncentiveLeadOwner8"
+ruleflow-group "Test"
+salience 3
+when
+//$R:IncentiveTest( payment>trgt_rev==true  ,$A:scheme_id ,based_on.equals("% of CTC") ,type_of.equals("CTC")  ,sales_type.equals("Primary")|| sales_type.equals("Secondary")   ,$D:(value*(ctc/100))  )
+$R:IncentiveTest( payment>trgt_rev==false  ,$A:scheme_id ,based_on.equals("No. of Accounts") ,type_of.equals("% of Accounts")  ,sales_type.equals("Primary")|| sales_type.equals("Secondary")   ,$D:(value*(ctc/100))  )
+then
+$R.setResults("NA");
+System.out.println("Lead Owner Incentive: "+$D);
+end
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+///////////////  AC   error
+
+rule "CalculateIncentiveLeadOwner5"
+ruleflow-group "Test"
+salience 3
+when
+//$R:IncentiveTest( payment>trgt_rev==true  ,$A:scheme_id ,based_on.equals("% of CTC") ,type_of.equals("CTC")  ,sales_type.equals("Primary")|| sales_type.equals("Secondary")   ,$D:(value*(ctc/100))  )
+$R:IncentiveTest( payment>trgt_rev==true  ,$A:scheme_id ,based_on.equals("No. of Accounts") ,type_of.equals("Multiple Of Accounts")  ,sales_type.equals("Primary")|| sales_type.equals("Secondary")   ,$D:(value*(ctc/100))  )
+then
+$R.setResults("NA");
+System.out.println("Lead Owner Incentive: "+$D);
+System.out.println("condition:  "+ (payment>trgt_rev==true));
+end
+
+rule "CalculateIncentiveLeadOwner6"
+ruleflow-group "Test"
+salience 3
+when
+//$R:IncentiveTest( payment>trgt_rev==false  ,$A:scheme_id ,based_on.equals("% of CTC") ,type_of.equals("CTC")  ,sales_type.equals("Primary")|| sales_type.equals("Secondary")   ,$D:(value*(ctc/100))  )
+$R:IncentiveTest( payment>trgt_rev==false  ,$A:scheme_id ,based_on.equals("No. of Accounts") ,type_of.equals("% of Accounts")  ,sales_type.equals("Primary")|| sales_type.equals("Secondary")   ,$D:(value*(ctc/100))  )
+then
+$R.setResults("NA");
+System.out.println(" "+$D);
+System.out.println("Lead Owner Incentive: "+$D);
+System.out.println("COndition "+ (payment>trgt_rev==true));
+end
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+rule "CalculateIncentiveLeadOwner1"
+ruleflow-group "Test"
+salience 3
+when
+//$R:IncentiveTest(  $Z:type_of , $H:incentiveEligible  , $M:incentTypes,$M.equals("Primary"),$Z.equals("Multiple Of Payments")   ,$H.equals("Yes"),$D:(payment*(value/100)))
+//$R:IncentiveTest( $Z:type_of,$W:ctc , $H:incentiveEligible  , $M:incentTypes,$M.equals("Primary"),$Z.equals("Multiple Of Payments") , based_on.equals("No. of Accounts")  ,$H.equals("Yes"),$D:(payment*value)  )
+$R:IncentiveTest( trgt_rev>payment==true  ,$A:scheme_id ,based_on.equals("Multiple of CTC") ,type_of.equals("CTC")  ,sales_type.equals("Primary")|| sales_type.equals("Secondary")   ,$D:(ctc*value)  )
+then
+$R.setResults(""+$D);
+System.out.println("Lead Owner Incentive: "+$D);
+end
+
+
+
+rule "CalculateIncentiveLeadOwner2"
+//ruleflow-group "Test"
+salience 3
+when
+$R:IncentiveTest( $Z:type_of,$W:payment , $H:incentiveEligible  , $M:incentTypes,$M.equals("Primary"),$Z.equals("Multiple Of CTC") , based_on.equals("No. of Accounts")  ,$H.equals("Yes"),$D:(value*ctc)  )
+then
+$R.setResults(""+$D);
+System.out.println("Lead Owner Incentive: "+$D);
+end
+
+
+
+
+rule "CalculateIncentiveLeadOwner3"
+//ruleflow-group "Test"
+salience 3
+when
+//$R:IncentiveTest(  $Z:type_of , $H:incentiveEligible  , $M:incentTypes,$M.equals("Primary"),$Z.equals("Multiple Of Payments")   ,$H.equals("Yes"),$D:(payment*(value/100)))
+
+$R:IncentiveTest( $Z:type_of,$W:ctc , $H:incentiveEligible  , $M:incentTypes,$M.equals("Primary"),$Z.equals("% Of Payments") , based_on.equals("No. of Accounts")  ,$H.equals("Yes"),$D:(value*(payment/100))  )
+then
+$R.setResults(""+$D);
+System.out.println("Lead Owner Incentive: "+$D);
+end
+
+
+rule "CalculateIncentiveLeadOwner4"
+//ruleflow-group "Test"
+salience 3
+when
+//$R:IncentiveTest(  $Z:type_of , $H:incentiveEligible  , $M:incentTypes,$M.equals("Primary"),$Z.equals("Multiple Of Payments")   ,$H.equals("Yes"),$D:(payment*(value/100)))
+
+$R:IncentiveTest( $Z:type_of,$W:payment , $H:incentiveEligible  , $M:incentTypes,$M.equals("Primary"),$Z.equals("% Of CTC") , based_on.equals("No. of Accounts")  ,$H.equals("Yes"),$D:(value*(ctc/100))  )
+then
+$R.setResults(""+$D);
+System.out.println("Lead Owner Incentive: "+$D);
+end
+
+
+
+/*
+
+///////////////////  Assistance Lead Owner  ///////////////
+rule "CalculateIncentiveAssistanceLeadOwner1"
+//ruleflow-group "Test"
+salience 3
+when
+$R:IncentiveTest($Z:type_of ,$H:incentiveEligible  , $M:incentTypes,   $M.equals("Secondary"),$Z.equals("Multiple Of Payments") ,$H.equals("Yes"),$D:(payment*(value/100)))
+then
+$R.setIncen($D);
+System.out.println("Assistance Lead Owner Incentive: "+$D);
+end
+
+rule "CalculateIncentiveAssistanceLeadOwner2"
+//ruleflow-group "Test"
+salience 3
+when
+$R:IncentiveTest($Z:type_of ,$H:incentiveEligible  , $M:incentTypes,   $M.equals("Secondary"),$Z.equals("Multiple Of Payments") ,$H.equals("Yes"),$D:(payment*(value/100)))
+then
+$R.setIncen($D);
+System.out.println("Assistance Lead Owner Incentive: "+$D);
+end
+
+
+////////////////////  Contract Renewal ///////////////////
+rule "CalculateIncentiveContractRenewal"
+//ruleflow-group "Test"
+salience 3
+when
+$R:IncentiveTest($H:incentiveEligible  , $M:incentTypes, $M.equals("CR")  ,$H.equals("Yes"),$D:(payment*(1/100)))
+then
+$R.setIncen($D);
+System.out.println("Contract Renewal Incentive: "+$D);
+end
+
+
+
+
+rule "CalculateIncentiveNotEligible"
+//ruleflow-group "Test"
+salience 3
+when
+$R:IncentiveTest(incentiveEligible.equals("No") )
+then
+$R.setIncen(0000.00);
+System.out.println("Not Eligible for Incentive");
+end
+
+
+
+rule "CalculateIncentiveNotEligibleLO"
+//ruleflow-group "Test"
+salience 3
+when
+$R:IncentiveTest(incentTypes.equals("Primary"),incentiveEligible.equals("No") )
+then
+$R.setIncen(0000.00);
+System.out.println("Not Eligible for Incentive");
+end
+
+rule "CalculateIncentiveNotEligibleALO"
+//ruleflow-group "Test"
+salience 3
+when
+$R:IncentiveTest(incentTypes.equals("Secondary"),incentiveEligible.equals("No") )
+then
+$R.setIncen(0000.00);
+System.out.println("Not Eligible for Incentive");
+end
+
+
+rule "CalculateIncentiveNotEligibleCR"
+//ruleflow-group "Test"
+salience 3
+when
+$R:IncentiveTest(incentTypes.equals("CR"),incentiveEligible.equals("No") )
+then
+$R.setIncen(0000.00);
+System.out.println("Not Eligible for Incentive");
+end
+
+
+*/
